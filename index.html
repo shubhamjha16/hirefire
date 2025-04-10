@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HireFire - Discreet Gig Marketplace</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ibm-plex@4.0.2/css/ibm-plex.min.css">
+    <style>
+        :root {
+            --primary: #111111;
+            --secondary: #222222;
+            --accent: #008080;
+            --accent-hover: #006666;
+            --text: #cccccc;
+            --text-light: #999999;
+            --danger: #ff4444;
+        }
+        
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background-color: var(--primary);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .bg-primary { background-color: var(--primary); }
+        .bg-secondary { background-color: var(--secondary); }
+        .bg-accent { background-color: var(--accent); }
+        .text-accent { color: var(--accent); }
+        .border-accent { border-color: var(--accent); }
+        .text-danger { color: var(--danger); }
+        
+        .card {
+            background-color: var(--secondary);
+            border-radius: 8px;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 20px rgba(0, 0, 0, 0.7);
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .btn-accent {
+            background-color: var(--accent);
+            color: white;
+        }
+        
+        .btn-accent:hover {
+            background-color: var(--accent-hover);
+        }
+        
+        .glow {
+            text-shadow: 0 0 8px var(--accent);
+        }
+        
+        .disclaimer {
+            border-left: 4px solid var(--danger);
+            background-color: rgba(255, 68, 68, 0.1);
+        }
+        
+        .tag {
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        
+        .tag-sfw { background-color: #2d7d46; color: white; }
+        .tag-nsfw { background-color: #d83a3a; color: white; }
+        .tag-underground { background-color: #5d4a7e; color: white; }
+        .tag-other { background-color: #666666; color: white; }
+        
+        .message-bubble {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            margin-bottom: 10px;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .message-received {
+            background-color: #2d2d2d;
+            border-bottom-left-radius: 5px;
+            align-self: flex-start;
+        }
+        
+        .message-sent {
+            background-color: #006060;
+            border-bottom-right-radius: 5px;
+            align-self: flex-end;
+        }
+        
+        .encryption-indicator {
+            font-size: 0.65rem;
+            opacity: 0.6;
+        }
+
+        /* Styling for checkboxes */
+        .custom-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background-color: #333;
+            border: 1px solid #666;
+            border-radius: 3px;
+            cursor: pointer;
+            position: relative;
+            transition: background-color 0.2s;
+        }
+        
+        .custom-checkbox:checked {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+        
+        .custom-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+        
+        /* Styling for glowing elements */
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        /* Hover effects for cards */
+        .hover-effect:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(0,128,128,0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Header Section -->
+    <header class="bg-secondary py-4 px-6 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center">
+                <span class="text-2xl font-bold text-accent glow">Hire<span class="text-danger">Fire</span></span>
+                <span class="text-sm ml-2 text-light">v0.9.5 BETA</span>
+                <span class="text-xs ml-2 text-text-light italic">Inspired by Dark Web</span>
+            </div>
+            <nav class="hidden md:flex space-x-6 text-sm">
+                <a href="#" class="text-accent hover:text-accent-hover">Home</a>
+                <a href="#" class="flex items-center text-text-light hover:text-accent">
+                    <i class="fas fa-ghost mr-1"></i> Ghost Mode
+                </a>
+            </nav>
+            <div class="flex items-center">
+                <span class="bg-secondary border border-gray-700 rounded-lg py-1 px-3 text-xs mr-3">
+                    <i class="fas fa-user-secret mr-1"></i> HF-X91A
+                </span>
+                <button class="btn btn-accent text-sm">
+                    <i class="fas fa-plus mr-1"></i> New Task
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Global Disclaimer Banner -->
+    <div class="disclaimer px-6 py-4 mb-8">
+        <div class="container mx-auto">
+            <h2 class="text-xl font-bold text-danger flex items-center">
+                <i class="fas fa-exclamation-triangle mr-2"></i> IMPORTANT DISCLAIMER
+            </h2>
+            <p class="mt-2 text-sm">
+                HireFire strictly prohibits the use of this platform for illegal activities including but not limited to drug trafficking, prostitution, and other unlawful services. Any accounts found violating these terms will be immediately terminated and may be reported to relevant authorities. By using HireFire, you agree to comply with all applicable laws and regulations.
+            </p>
+        </div>
+    </div>
+
+    <main class="container mx-auto px-4 pb-20">
+        <!-- Anonymous Account Section -->
+        <section class="mb-16">
+            <h2 class="text-2xl font-bold mb-6 text-accent">
+                <i class="fas fa-mask mr-2"></i> Anonymous Account Verification
+            </h2>
+            <div class="card p-6 mb-6">
+                <div class="flex flex-col md:flex-row">
+                    <div class="md:w-1/2 mb-6 md:mb-0 md:pr-6">
+                        <h3 class="text-xl font-bold mb-3">Your Digital Identity</h3>
+                        <p class="text-text-light mb-4">
+                            No login or personal details required. We generate a unique ID after UPI verification. Your real identity remains hidden while maintaining accountability.
+                        </p>
+                        <div class="bg-primary p-4 rounded-lg mb-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm">Your HireFire ID:</span>
+                                <span class="text-accent font-mono">HF-X91A</span>
+                            </div>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm">Verification Status:</span>
+                                <span class="text-green-500 flex items-center">
+                                    <i class="fas fa-check-circle mr-1"></i> Verified
+                                </span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm">Reputation Score:</span>
+                                <div class="flex items-center">
+                                    <span class="text-yellow-500 mr-2">4.7</span>
+                                    <div class="flex">
+                                        <i class="fas fa-star text-yellow-500 text-xs"></i>
+                                        <i class="fas fa-star text-yellow-500 text-xs"></i>
+                                        <i class="fas fa-star text-yellow-500 text-xs"></i>
+                                        <i class="fas fa-star text-yellow-500 text-xs"></i>
+                                        <i class="fas fa-star-half-alt text-yellow-500 text-xs"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2 bg-primary p-4 rounded-lg">
+                        <h3 class="text-lg font-bold mb-3">UPI Verification</h3>
+                        <p class="text-text-light text-sm mb-4">
+                            Your UPI ID is encrypted and never shared with other users. We only verify that you have a valid payment method.
+                        </p>
+                        <div class="flex mb-4">
+                            <input type="text" placeholder="Enter UPI ID (e.g., name@upi)" class="bg-secondary text-text p-2 rounded border border-gray-700 w-full focus:border-accent focus:outline-none">
+                            <button class="btn btn-accent ml-2 whitespace-nowrap">
+                                Verify
+                            </button>
+                        </div>
+                        <div class="flex items-center text-xs">
+                            <i class="fas fa-shield-alt text-accent mr-2"></i>
+                            <span>Secured with Razorpay API & AES-256 encryption</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Task Board Section -->
+        <section class="mb-16">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-accent">
+                        <i class="fas fa-tasks mr-2"></i> Community Task Board
+                    </h2>
+                    <p class="text-sm text-text-light mt-1">Community Based Taskboard Inspired by Reddit</p>
+                </div>
+                <div class="flex items-center">
+                    <div class="relative mr-4">
+                        <input type="text" placeholder="Search tasks..." class="bg-secondary text-text p-2 pl-8 rounded border border-gray-700 w-full focus:border-accent focus:outline-none">
+                        <i class="fas fa-search absolute left-3 top-3 text-text-light"></i>
+                    </div>
+                    <div class="flex">
+                        <button class="bg-secondary py-2 px-3 rounded-l border border-gray-700 hover:bg-accent hover:text-white transition-colors">
+                            <i class="fas fa-filter"></i>
+                        </button>
+                        <button class="bg-secondary py-2 px-3 rounded-r border border-gray-700 border-l-0 hover:bg-accent hover:text-white transition-colors">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Task Filters -->
+            <div class="flex flex-wrap gap-2 mb-6">
+                <span class="tag bg-secondary hover:bg-accent cursor-pointer transition-colors">All Tasks</span>
+                <span class="tag tag-sfw">SFW</span>
+                <span class="tag tag-nsfw">NSFW</span>
+                <span class="tag tag-underground">Underground</span>
+                <span class="tag tag-other">Other</span>
+                <span class="tag bg-secondary hover:bg-accent cursor-pointer transition-colors">Nearby</span>
+                <span class="tag bg-secondary hover:bg-accent cursor-pointer transition-colors">High Paying</span>
+                <span class="tag bg-secondary hover:bg-accent cursor-pointer transition-colors">Urgent</span>
+            </div>
+            
+            <!-- Task Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <!-- Task 1 -->
+                <div class="card p-5 hover-effect border border-gray-800 hover:border-accent">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h3 class="font-bold text-lg">Discreet Delivery Service Required</h3>
+                            <div class="flex mt-1">
+                                <span class="tag tag-sfw">SFW</span>
+                                <span class="tag bg-blue-900">Delivery</span>
+                            </div>
+                        </div>
+                        <span class="text-accent font-bold">₹1,200</span>
+                    </div>
+                    <p class="text-text-light text-sm mb-4">
+                        Need someone to deliver a sealed package across town. No questions asked. Quick service needed. Discretion is essential.
+                    </p>
+                    <div class="flex justify-between items-center text-xs text-text-light">
+                        <div class="flex items-center">
+                            <i class="fas fa-map-pin mr-1"></i> Burari
+                            <span class="mx-2">•</span>
+                            <i class="fas fa-clock mr-1"></i> Expires in 19h
+                        </div>
+                        <div class="flex items-center">
+                            <button class="text-text-light hover:text-accent mr-3">
+                                <i class="fas fa-arrow-up mr-1"></i> 14
+                            </button>
+                            <span class="text-yellow-500 flex items-center mr-3">
+                                <i class="fas fa-user-circle mr-1"></i> HF-M29C
+                            </span>
+                            <button class="btn bg-accent py-1 px-3 text-white text-xs">
+                                Contact
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Task 2 -->
+                <div class="card p-5 hover-effect border border-gray-800 hover:border-accent">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h3 class="font-bold text-lg">Private Event Photography</h3>
+                            <div class="flex mt-1">
+                                <span class="tag tag-nsfw">NSFW</span>
+                                <span class="tag bg-purple-900">Creative</span>
+                            </div>
+                        </div>
+                        <span class="text-accent font-bold">₹3,500</span>
+                    </div>
+                    <p class="text-text-light text-sm mb-4">
+                        Seeking professional with own equipment for private, discreet event photography. Signing NDA required. Exclusive private party, artistic sensibilities needed.
+                    </p>
+                    <div class="flex justify-between items-center text-xs text-text-light">
+                        <div class="flex items-center">
+                            <i class="fas fa-map-pin mr-1"></i> Gurgaon Sector 56
+                            <span class="mx-2">•</span>
+                            <i class="fas fa-clock mr-1"></i> Expires in 10h
+                        </div>
+                        <div class="flex items-center">
+                            <button class="text-text-light hover:text-accent mr-3">
+                                <i class="fas fa-arrow-up mr-1"></i> 27
+                            </button>
+                            <span class="text-yellow-500 flex items-center mr-3">
+                                <i class="fas fa-user-circle mr-1"></i> HF-P82T
+                            </span>
+                            <button class="btn bg-accent py-1 px-3 text-white text-xs">
+                                Contact
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Task 3 -->
+                <div class="card p-5 hover-effect border border-gray-800 hover:border-accent">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h3 class="font-bold text-lg">Nightclub Line Management</h3>
+                            <div class="flex mt-1">
+                                <span class="tag tag-underground">Underground</span>
+                                <span class="tag bg-gray-700">Security</span>
+                            </div>
+                        </div>
+                        <span class="text-accent font-bold">₹2,800/night</span>
+                    </div>
+                    <p class="text-text-light text-sm mb-4">
+                        Need security personnel for entrance control at exclusive nightclub. Looking for imposing physical presence. Experience preferred. Weekend nights only.
+                    </p>
+                    <div class="flex justify-between items-center text-xs text-text-light">
+                        <div class="flex items-center">
+                            <i class="fas fa-map-pin mr-1"></i> Janakpuri
+                            <span class="mx-2">•</span>
+                            <i class="fas fa-clock mr-1"></i> Expires in 8h
+                        </div>
+                        <div class="flex items-center">
+                            <button class="text-text-light hover:text-accent mr-3">
+                                <i class="fas fa-arrow-up mr-1"></i> 8
+                            </button>
+                            <span class="text-yellow-500 flex items-center mr-3">
+                                <i class="fas fa-user-circle mr-1"></i> HF-K19H
+                            </span>
+                            <button class="btn bg-accent py-1 px-3 text-white text-xs">
+                                Contact
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Task 4 -->
+                <div class="card p-5 hover-effect border border-gray-800 hover:border-accent">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h3 class="font-bold text-lg">Personal Assistant For VIP</h3>
+                            <div class="flex mt-1">
+                                <span class="tag tag-other">Other</span>
+                                <span class="tag bg-pink-900">Companionship</span>
+                            </div>
+                        </div>
+                        <span class="text-accent font-bold">₹5,000</span>
+                    </div>
+                    <p class="text-text-light text-sm mb-4">
+                        Seeking sophisticated individual for high-profile client visit. Must be well-dressed, articulate and adaptable. Social skills essential. 12pm to 3pm only.
+                    </p>
+                    <div class="flex justify-between items-center text-xs text-text-light">
+                        <div class="flex items-center">
+                            <i class="fas fa-map-pin mr-1"></i> Najafgarh
+                            <span class="mx-2">•</span>
+                            <i class="fas fa-clock mr-1"></i> Expires in 15h
+                        </div>
+                        <div class="flex items-center">
+                            <button class="text-text-light hover:text-accent mr-3">
+                                <i class="fas fa-arrow-up mr-1"></i> 41
+                            </button>
+                            <span class="text-yellow-500 flex items-center mr-3">
+                                <i class="fas fa-user-circle mr-1"></i> HF-R37F
+                            </span>
+                            <button class="btn bg-accent py-1 px-3 text-white text-xs">
+                                Contact
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <button class="btn bg-secondary text-text-light hover:text-white px-6">
+                    Load More <i class="fas fa-chevron-down ml-1"></i>
+                </button>
+            </div>
+        </section>
+        
+        <!-- Encrypted Chat Section -->
+        <section class="mb-16">
+            <h2 class="text-2xl font-bold mb-6 text-accent">
+                <i class="fas fa-lock mr-2"></i> Encrypted Communication
+            </h2>
+            <div class="card p-5">
+                <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-700">
+                    <div class="flex items-center">
+                        <span class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-xl">
+                            <i class="fas fa-user-secret"></i>
+                        </span>
+                        <div class="ml-3">
+                            <div class="font-bold">HF-P82T</div>
+                            <div class="text-xs text-text-light flex items-center">
+                                <i class="fas fa-circle text-green-500 mr-1" style="font-size: 8px;"></i>
+                                Online
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex">
+                        <button class="text-text-light hover:text-accent mx-2">
+                            <i class="fas fa-phone"></i>
+                        </button>
+                        <button class="text-text-light hover:text-accent mx-2">
+                            <i class="fas fa-video"></i>
+                        </button>
+                        <button class="text-danger mx-2">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col h-64 overflow-y-auto mb-4 px-2">
+                    <div class="encryption-indicator text-center my-2 text-text-light">
+                        <i class="fas fa-shield-alt mr-1"></i>
+                        End-to-end encrypted conversation • Started 2 hours ago
+                    </div>
+                    
+                    <div class="message-bubble message-received">
+                        <p>Hey, I saw your photography task post. Can you provide more details about the event?</p>
+                        <div class="text-xs text-text-light mt-1 flex justify-between">
+                            <span>19:32</span>
+                            <i class="fas fa-check-double"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="message-bubble message-sent">
+                        <p>Sure, it's a private art gallery opening with some avant-garde pieces. We need discreet photography of the guests and exhibits.</p>
+                        <div class="text-xs text-text-light mt-1 flex justify-between">
+                            <span>19:35</span>
+                            <i class="fas fa-check-double"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="message-bubble message-received">
+                        <p>What kind of equipment should I bring? And is there a dress code?</p>
+                        <div class="text-xs text-text-light mt-1 flex justify-between">
+                            <span>19:38</span>
+                            <i class="fas fa-check-double"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="message-bubble message-sent">
+                        <p>DSLR with low-light capability and some prime lenses. Black formal attire required. The lighting will be minimal.</p>
+                        <div class="text-xs text-text-light mt-1 flex justify-between">
+                            <span>19:40</span>
+                            <i class="fas fa-check-double"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="message-bubble message-received">
+                        <p>Got it. I can do ₹3,800 for the full night. I've worked similar events before.</p>
+                        <div class="text-xs text-text-light mt-1 flex justify-between">
+                            <span>19:45</span>
+                            <i class="fas fa-check-double"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="encryption-indicator text-center my-2 text-yellow-500">
+                        <i class="fas fa-fire mr-1"></i>
+                        Messages set to burn in 22 hours
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <input type="text" placeholder="Type a message..." class="w-full bg-primary text-text p-3 pr-12 rounded-lg border border-gray-700 focus:border-accent focus:outline-none">
+                    <div class="absolute right-3 top-3 flex">
+                        <button class="text-text-light hover:text-accent mr-3">
+                            <i class="fas fa-paperclip"></i>
+                        </button>
+                        <button class="text-accent">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mt-3 flex items-center text-xs text-text-light justify-between">
+                    <div class="flex items-center">
+                        <i class="fas fa-lock text-accent mr-1"></i>
+                        <span>AES-256 Encrypted</span>
+                    </div>
+                    <div class="flex items-center">
+                        <label class="flex items-center cursor-pointer mr-4">
+                            <input type="checkbox" class="custom-checkbox mr-2">
+                            <span>Burn after reading</span>
+                        </label>
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" class="custom-checkbox mr-2">
+                            <span>Self-destruct in 24h</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Payment System Section -->
+        <section class="mb-16">
+            <h2 class="text-2xl font-bold mb-6 text-accent">
+                <i class="fas fa-rupee-sign mr-2"></i> UPI Payment Integration
+            </h2>
+            <div class="card p-5">
+                <div class="flex flex-col md:flex-row">
+                    <div class="md:w-1/2 mb-6 md:mb-0 md:pr-6">
+                        <h3 class="text-xl font-bold mb-4">Secure Peer-to-Peer Payments</h3>
+                        <p class="text-text-light mb-4">
+                            All transactions occur directly between users. HireFire never holds your funds at any point, ensuring maximum privacy and security.
+                        </p>
+                        <div class="bg-primary p-4 rounded-lg mb-4">
+                            <h4 class="font-bold mb-2">Recent Transactions</h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center pb-2 border-b border-gray-800">
+                                    <div>
+                                        <div class="font-medium">Photography Assignment</div>
+                                        <div class="text-xs text-text-light">To: HF-P82T • 2 hours ago</div>
+                                    </div>
+                                    <span class="text-red-500">-₹1,500</span>
+                                </div>
+                                <div class="flex justify-between items-center pb-2 border-b border-gray-800">
+                                    <div>
+                                        <div class="font-medium">Tech Support</div>
+                                        <div class="text-xs text-text-light">From: HF-T44K • 2 days ago</div>
+                                    </div>
+                                    <span class="text-green-500">+₹2,200</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <div class="font-medium">Content Writing</div>
+                                        <div class="text-xs text-text-light">From: HF-J61L • 5 days ago</div>
+                                    </div>
+                                    <span class="text-green-500">+₹800</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2">
+                        <div class="bg-primary p-4 rounded-lg mb-4">
+                            <h4 class="font-bold mb-3">Send Payment</h4>
+                            <div class="mb-3">
+                                <label class="block text-text-light text-sm mb-1">Recipient ID</label>
+                                <input type="text" value="HF-P82T" class="bg-secondary text-text p-2 rounded border border-gray-700 w-full focus:border-accent focus:outline-none">
+                            </div>
+                            <div class="mb-3">
+                                <label class="block text-text-light text-sm mb-1">Amount (₹)</label>
+                                <input type="text" value="3,800" class="bg-secondary text-text p-2 rounded border border-gray-700 w-full focus:border-accent focus:outline-none">
+                            </div>
+                            <div class="mb-3">
+                                <label class="block text-text-light text-sm mb-1">Note (Optional)</label>
+                                <input type="text" value="Photography services" class="bg-secondary text-text p-2 rounded border border-gray-700 w-full focus:border-accent focus:outline-none">
+                            </div>
+                            <div class="bg-secondary p-3 rounded-lg mb-4">
+                                <div class="flex justify-between items-center text-sm mb-2">
+                                    <span>Payment Amount</span>
+                                    <span>₹3,800.00</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm mb-2">
+                                    <span>Platform Fee (5%)</span>
+                                    <span>₹190.00</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm font-bold pt-2 border-t border-gray-700">
+                                    <span>Total</span>
+                                    <span>₹3,990.00</span>
+                                </div>
+                            </div>
+                            <button class="btn btn-accent w-full">
+                                <i class="fas fa-lock mr-1"></i> Pay Securely
+                            </button>
+                            <div class="flex items-center justify-center text-xs text-text-light mt-3">
+                                <i class="fas fa-shield-alt text-accent mr-1"></i>
+                                Powered by Razorpay
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Legal Disclaimer Section -->
+        <section class="mb-16">
+            <div class="card p-5 border-l-4 border-danger">
+                <h2 class="text-lg font-bold mb-3 text-danger">DETAILED LEGAL DISCLAIMER</h2>
+                <div class="text-sm text-text-light space-y-3">
+                    <p>
+                        <strong>Prohibited Activities:</strong> HireFire explicitly prohibits the use of this platform for any illegal activities including but not limited to drug trafficking, prostitution, weapons trade, human trafficking, sale of stolen goods, or any other service that violates local, state, or federal laws.
+                    </p>
+                    <p>
+                        <strong>Content Moderation:</strong> All listings on HireFire are subject to AI content moderation that automatically reformats or rejects inappropriate content. However, our system may not catch all potentially problematic content. If you see something suspicious, please report it immediately.
+                    </p>
+                    <p>
+                        <strong>User Responsibility:</strong> Users are solely responsible for ensuring their activities comply with all applicable laws. HireFire serves as a technology platform only and does not endorse or take responsibility for user-initiated actions or transactions.
+                    </p>
+                    <p>
+                        <strong>Enforcement:</strong> We cooperate fully with law enforcement agencies in investigating any potentially illegal activities. Accounts found violating our terms will be permanently banned from the platform.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="bg-secondary py-6 px-6">
+        <div class="container mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <span class="text-xl font-bold text-accent">Hire<span class="text-danger">Fire</span></span>
+                    <p class="text-text-light text-sm mt-1">Discreet Gig Marketplace</p>
+                </div>
+                <div class="flex space-x-6 text-sm text-text-light">
+                    <a href="#" class="hover:text-accent">Terms of Service</a>
+                    <a href="#" class="hover:text-accent">Privacy Policy</a>
+                    <a href="#" class="hover:text-accent">Community Guidelines</a>
+                    <a href="#" class="hover:text-accent">Support</a>
+                </div>
+            </div>
+            <div class="mt-6 pt-6 border-t border-gray-800 text-center text-xs text-text-light">
+                <p>HireFire &copy; 2023. All rights reserved. For legal purposes only.</p>
+                <p class="mt-2">This platform is intended for legitimate services and entertainment purposes only.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
